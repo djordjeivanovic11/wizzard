@@ -1,0 +1,13 @@
+diff --git a/src/packaging/_tokenizer.py b/src/packaging/_tokenizer.py
+index 30caee9..db7cd17 100644
+--- a/src/packaging/_tokenizer.py
++++ b/src/packaging/_tokenizer.py
+@@ -89,7 +89,7 @@ DEFAULT_RULES: dict[str, re.Pattern[str]] = {
+     "VERSION_PREFIX_TRAIL": re.compile(r"\.\*"),
+     "VERSION_LOCAL_LABEL_TRAIL": re.compile(r"\+[a-z0-9]+(?:[-_\.][a-z0-9]+)*"),
+     "WS": re.compile(r"[ \t]+"),
+-    "END": re.compile(r"$"),
++    "END": re.compile(r"\Z"),
+ }
+ 
+ 

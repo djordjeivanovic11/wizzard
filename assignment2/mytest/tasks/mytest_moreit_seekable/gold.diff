@@ -1,0 +1,39 @@
+commit 3eb4053e1aacac53853f6e0abae556f280726f01
+Author: Rupayon Haldar <80724680+rupayon123@users.noreply.github.com>
+Date:   Tue Sep 22 09:20:30 2026 -0400
+
+    Bound zero-cache seekable lookahead storage
+
+diff --git a/more_itertools/more.py b/more_itertools/more.py
+index 0fed997..3726d41 100755
+--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -3093,7 +3093,7 @@ class seekable:
+     """
+ 
+     def __init__(self, iterable, maxlen=None):
+-        self._source = iter(iterable)
++        self._source = peekable(iterable) if maxlen == 0 else iter(iterable)
+         if maxlen is None:
+             self._cache = []
+         else:
+@@ -3125,17 +3125,14 @@ class seekable:
+         return True
+ 
+     def peek(self, default=_marker):
++        if getattr(self._cache, 'maxlen', None) == 0:
++            return self._source.peek(default)
+         try:
+             peeked = next(self)
+         except StopIteration:
+             if default is _marker:
+                 raise
+             return default
+-        # maxlen=0 cannot store the item we just consumed, so put it back.
+-        if getattr(self._cache, 'maxlen', None) == 0:
+-            self._source = chain((peeked,), self._source)
+-            self._index = None
+-            return peeked
+         if self._index is None:
+             self._index = len(self._cache)
+         self._index -= 1

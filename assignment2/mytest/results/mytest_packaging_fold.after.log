@@ -1,0 +1,26 @@
+HEAD is now at 413d006 docs: changelog for 26.3 (#1343)
+HEAD is now at 413d006 docs: changelog for 26.3 (#1343)
+........................................................................ [ 21%]
+........................................................................ [ 42%]
+........................................................................ [ 63%]
+........................................................................ [ 84%]
+......................................................                   [100%]
+342 passed in 0.84s
+PASS tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\n    Again]
+PASS tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\rAgain]
+PASS tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\u2028Again]
+PASS tests/test_metadata.py::TestMetadata::test_valid_summary
+PASS tests/test_metadata.py::TestMetadataWriting::test_body
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r\n]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2028]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2029]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0b]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0c]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1c]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1d]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1e]
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x85]
+PASS tests/test_metadata.py::TestMetadataWriting::test_multiline_license
+PASS tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return
+RESOLVED

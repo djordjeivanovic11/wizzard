@@ -1,0 +1,33 @@
+diff --git a/more_itertools/more.py b/more_itertools/more.py
+index 0fed997..ca129bd 100755
+--- a/more_itertools/more.py
++++ b/more_itertools/more.py
+@@ -3093,10 +3093,14 @@ class seekable:
+     """
+ 
+     def __init__(self, iterable, maxlen=None):
+-        self._source = iter(iterable)
+         if maxlen is None:
++            self._source = iter(iterable)
+             self._cache = []
++        elif maxlen == 0:
++            self._source = peekable(iter(iterable))
++            self._cache = deque([], 0)
+         else:
++            self._source = iter(iterable)
+             self._cache = deque([], maxlen)
+         self._index = None
+ 
+@@ -3131,9 +3135,10 @@ class seekable:
+             if default is _marker:
+                 raise
+             return default
+-        # maxlen=0 cannot store the item we just consumed, so put it back.
++        # maxlen=0 cannot store the item we just consumed, so put it back
++        # using the peekable's internal cache instead of creating chain objects.
+         if getattr(self._cache, 'maxlen', None) == 0:
+-            self._source = chain((peeked,), self._source)
++            self._source.prepend(peeked)
+             self._index = None
+             return peeked
+         if self._index is None:

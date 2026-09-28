@@ -1,0 +1,26 @@
+HEAD is now at b5e3886 Merge pull request #1269 from otiscuilei/fix/seekable-maxlen-zero-peek
+HEAD is now at b5e3886 Merge pull request #1269 from otiscuilei/fix/seekable-maxlen-zero-peek
+F.................................................................. [ 10%]
+........................................................... [ 20%]
+............................................................................................................. [ 38%]
+....................................................................................................................................................... [ 62%]
+.................................... [ 68%]
+............................................................ [ 77%]
+.................. [ 80%]
+.............................................................. [ 90%]
+.............................................. [ 98%]
+..........                 [100%]
+=================================== FAILURES ===================================
+_____ SeekableMemoryTests.test_repeated_zero_cache_peek_has_bounded_memory _____
+tests/test_seekable_memory.py:29: in test_repeated_zero_cache_peek_has_bounded_memory
+    self.assertLess(retained, 256 * 1024)
+E   AssertionError: 4932672 not less than 262144
+=========================== short test summary info ============================
+FAILED tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory
+1 failed, 617 passed, 11318 subtests passed in 9.14s
+PASS tests/test_more.py::SeekableTest::test_exhaustion_reset
+PASS tests/test_more.py::SeekableTest::test_maxlen_zero
+PASS tests/test_more.py::SeekableTest::test_partial_reset
+FAIL tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory
+unresolved:
+  fail_to_pass still failing: tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory

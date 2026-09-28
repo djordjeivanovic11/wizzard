@@ -1,0 +1,12 @@
+HEAD is now at c442cd4 Lead Quickstart examples with algorithm='modern'
+HEAD is now at c442cd4 Lead Quickstart examples with algorithm='modern'
+[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m [ 72%]
+[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                                              [100%][0m
+[32m[32m[1m40 passed[0m, [32m[1m115 subtests passed[0m[32m in 0.77s[0m[0m
+PASS tests/test_release.py::ReleaseRegressionTests::test_cli_preserves_legacy_default_shape
+PASS tests/test_release.py::ReleaseRegressionTests::test_empty_and_whitespace
+PASS tests/test_release.py::ReleaseRegressionTests::test_modern_fitting_post_replacements_preserve_delimiters
+PASS tests/test_release.py::ReleaseRegressionTests::test_modern_hard_cut_does_not_end_in_post_replacement_delimiters
+PASS tests/test_release.py::ReleaseRegressionTests::test_modern_separator_does_not_strip_word_content
+PASS tests/test_release.py::ReleaseRegressionTests::test_modern_word_boundary_hard_cut_keeps_delimiters_with_the_next_word
+RESOLVED

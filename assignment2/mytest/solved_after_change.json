@@ -1,0 +1,20 @@
+{
+ "mytest_moreit_seekable": {
+  "instance_id": "mytest_moreit_seekable",
+  "repo": "more-itertools/more-itertools",
+  "base_commit": "b5e3886a37209bb880f17d82fbf4ba00ece0e41e",
+  "docker_image": "mytest/moreit-seekable:local",
+  "problem_statement": "In more_itertools, seekable(iterable, maxlen=0) is meant to provide peek()/truthiness lookahead without retaining consumed items \u2014 but each peek() call consumes the next item from the source and, because a maxlen=0 deque cannot store it, wraps the source in a fresh itertools.chain to put it back. Calling peek() or bool() repeatedly therefore accumulates one chain object per call: memory grows linearly (a tracemalloc check over 10000 peek/bool iterations retains far more than 256 KB) and each call gets slower. Make zero-cache lookahead storage bounded \u2014 for example by keeping the lookahead in the source iterator (a peekable) instead of the result cache \u2014 so repeated peek()/bool() calls retain no per-call objects, peek() keeps returning the correct next item (and raising StopIteration or returning the default at exhaustion), and iteration order, seek()/elements() behavior, and all other seekable behavior stay unchanged.",
+  "requirements": "",
+  "interface": ""
+ },
+ "mytest_packaging_tokend": {
+  "instance_id": "mytest_packaging_tokend",
+  "repo": "pypa/packaging",
+  "docker_image": "mytest/packaging-tokend:local",
+  "base_commit": "0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81",
+  "problem_statement": "packaging's tokenizer treats a bare end-of-input marker with the regular-expression construct that also matches immediately before a final newline. As a result, a Marker or Requirement string that ends with a line break silently parses: `Marker('python_version >= \"3\"\\n')` and `Requirement('name>=1\\n')` are accepted even though embedded or trailing line breaks should make the input invalid. A trailing line break must raise InvalidMarker / InvalidRequirement, while a string ending in ordinary horizontal whitespace (spaces or tabs) must continue to parse successfully.",
+  "requirements": "",
+  "interface": ""
+ }
+}

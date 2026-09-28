@@ -1,0 +1,301 @@
+HEAD is now at 413d006 docs: changelog for 26.3 (#1343)
+HEAD is now at 413d006 docs: changelog for 26.3 (#1343)
+........................................................................ [ 21%]
+........................................................................ [ 42%]
+.................FF..................................................... [ 63%]
+........................................................................ [ 84%]
+...........................F...............F.FFFFFFFF.                   [100%]
+=================================== FAILURES ===================================
+_______________ TestMetadata.test_invalid_summary[Hello\rAgain] ________________
+tests/test_metadata.py:725: in test_invalid_summary
+    with pytest.raises(metadata.InvalidMetadata) as exc_info:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE InvalidMetadata
+        exc_info   = <ExceptionInfo for raises contextmanager>
+        meta       = <packaging.metadata.Metadata object at 0x784490f31ac0>
+        self       = <tests.test_metadata.TestMetadata object at 0x784491696f90>
+        summary    = 'Hello\rAgain'
+_____________ TestMetadata.test_invalid_summary[Hello\u2028Again] ______________
+tests/test_metadata.py:725: in test_invalid_summary
+    with pytest.raises(metadata.InvalidMetadata) as exc_info:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE InvalidMetadata
+        exc_info   = <ExceptionInfo for raises contextmanager>
+        meta       = <packaging.metadata.Metadata object at 0x784490f30fe0>
+        self       = <tests.test_metadata.TestMetadata object at 0x7844916974a0>
+        summary    = 'Hello\u2028Again'
+_________ TestMetadataWriting.test_write_metadata_with_carriage_return _________
+tests/test_metadata.py:1205: in test_write_metadata_with_carriage_return
+    written = meta.as_rfc822().as_string()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        meta       = <packaging.metadata.Metadata object at 0x784490f457c0>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x784491d6f020>
+/usr/local/lib/python3.12/email/message.py:1010: in as_string
+    return super().as_string(unixfrom, maxheaderlen, policy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        __class__  = <class 'email.message.MIMEPart'>
+        maxheaderlen = 0
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f45cd0>)
+        self       = <packaging.metadata.RFC822Message object at 0x784490f45b20>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/message.py:194: in as_string
+    g.flatten(self, unixfrom=unixfrom)
+        Generator  = <class 'email.generator.Generator'>
+        fp         = <_io.StringIO object at 0x7844915bd840>
+        g          = <email.generator.Generator object at 0x784490f45c40>
+        maxheaderlen = 0
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f45cd0>)
+        self       = <packaging.metadata.RFC822Message object at 0x784490f45b20>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/generator.py:118: in flatten
+    self._write(msg)
+        linesep    = None
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f45b20>
+        old_gen_policy = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f45cd0>)
+        old_msg_policy = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f45cd0>)
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f45cd0>, max_line_length=0)
+        self       = <email.generator.Generator object at 0x784490f45c40>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/generator.py:201: in _write
+    self._write_headers(msg)
+        meth       = None
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f45b20>
+        munge_cte  = None
+        oldfp      = <_io.StringIO object at 0x7844915bd840>
+        self       = <email.generator.Generator object at 0x784490f45c40>
+        sfp        = <_io.StringIO object at 0x7844915bdcc0>
+/usr/local/lib/python3.12/email/generator.py:235: in _write_headers
+    raise HeaderWriteError(
+E   email.errors.HeaderWriteError: folded header contains newline: 'author: Hello\nWorld\n'
+        folded     = 'author: Hello\nWorld\n'
+        h          = 'author'
+        linesep    = '\n'
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f45b20>
+        self       = <email.generator.Generator object at 0x784490f45c40>
+        v          = 'Hello\rWorld'
+________ TestMetadataWriting.test_headers_fold_every_line_boundary[\r] _________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+           ^^^^^^^^^^^^
+        boundary   = '\r'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x784491647c80>
+/usr/local/lib/python3.12/email/message.py:1013: in __str__
+    return self.as_string(policy=self.policy.clone(utf8=True))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self       = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+/usr/local/lib/python3.12/email/message.py:1010: in as_string
+    return super().as_string(unixfrom, maxheaderlen, policy)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        __class__  = <class 'email.message.MIMEPart'>
+        maxheaderlen = 0
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f1db80>, utf8=True)
+        self       = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/message.py:194: in as_string
+    g.flatten(self, unixfrom=unixfrom)
+        Generator  = <class 'email.generator.Generator'>
+        fp         = <_io.StringIO object at 0x7844915be380>
+        g          = <email.generator.Generator object at 0x784490f1f9e0>
+        maxheaderlen = 0
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f1db80>, utf8=True)
+        self       = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/generator.py:118: in flatten
+    self._write(msg)
+        linesep    = None
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        old_gen_policy = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f1db80>, utf8=True)
+        old_msg_policy = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f1db80>)
+        policy     = RFC822Policy(header_factory=<email.headerregistry.HeaderRegistry object at 0x784490f1db80>, utf8=True, max_line_length=0)
+        self       = <email.generator.Generator object at 0x784490f1f9e0>
+        unixfrom   = False
+/usr/local/lib/python3.12/email/generator.py:201: in _write
+    self._write_headers(msg)
+        meth       = None
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        munge_cte  = None
+        oldfp      = <_io.StringIO object at 0x7844915be380>
+        self       = <email.generator.Generator object at 0x784490f1f9e0>
+        sfp        = <_io.StringIO object at 0x7844915bc700>
+/usr/local/lib/python3.12/email/generator.py:235: in _write_headers
+    raise HeaderWriteError(
+E   email.errors.HeaderWriteError: folded header contains newline: 'ItemA: ValueA\nRequires-Dist: injected\n'
+        folded     = 'ItemA: ValueA\nRequires-Dist: injected\n'
+        h          = 'ItemA'
+        linesep    = '\n'
+        msg        = <packaging.metadata.RFC822Message object at 0x784490f1d8b0>
+        self       = <email.generator.Generator object at 0x784490f1f9e0>
+        v          = 'ValueA\rRequires-Dist: injected'
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x0b] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x0b'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f46510>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c230>
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x0c] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x0c'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f1e8d0>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c2f0>
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x1c] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x1c'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f1cbf0>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c3b0>
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x1d] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x1d'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f1c800>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c470>
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x1e] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x1e'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f1f170>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c560>
+_______ TestMetadataWriting.test_headers_fold_every_line_boundary[\x85] ________
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\x85'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f17380>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c650>
+______ TestMetadataWriting.test_headers_fold_every_line_boundary[\u2028] _______
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\u2028'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f16ab0>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c740>
+______ TestMetadataWriting.test_headers_fold_every_line_boundary[\u2029] _______
+tests/test_metadata.py:1504: in test_headers_fold_every_line_boundary
+    assert str(message) == "ItemA: ValueA\n       Requires-Dist: injected\n\n"
+E   AssertionError: assert 'ItemA: Value... injected\n\n' == 'ItemA: Value... injected\n\n'
+E     
+E     - ItemA: ValueA
+E     ?              ^
+E     + ItemA: ValueA
+E     
+E     ?              ^
+E     -        Requires-Dist: injected...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+        boundary   = '\u2029'
+        message    = <packaging.metadata.RFC822Message object at 0x784490f17d40>
+        self       = <tests.test_metadata.TestMetadataWriting object at 0x78449165c830>
+=========================== short test summary info ============================
+FAILED tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\rAgain]
+FAILED tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\u2028Again]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0b]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0c]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1c]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1d]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1e]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x85]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2028]
+FAILED tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2029]
+12 failed, 330 passed in 1.03s
+PASS tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\n    Again]
+PASS tests/test_metadata.py::TestMetadata::test_valid_summary
+PASS tests/test_metadata.py::TestMetadataWriting::test_body
+PASS tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r\n]
+PASS tests/test_metadata.py::TestMetadataWriting::test_multiline_license
+FAIL tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\rAgain]
+FAIL tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\u2028Again]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2028]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2029]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0b]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0c]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1c]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1d]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1e]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x85]
+FAIL tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return
+unresolved:
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\rAgain]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\u2028Again]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\r]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2028]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\u2029]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0b]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x0c]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1c]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1d]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x1e]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\x85]
+  fail_to_pass still failing: tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return

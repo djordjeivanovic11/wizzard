@@ -1,0 +1,18 @@
+HEAD is now at b5e3886 Merge pull request #1269 from otiscuilei/fix/seekable-maxlen-zero-peek
+HEAD is now at b5e3886 Merge pull request #1269 from otiscuilei/fix/seekable-maxlen-zero-peek
+................................................................... [ 10%]
+........................................................... [ 20%]
+............................................................................................................. [ 38%]
+....................................................................................................................................................... [ 62%]
+.................................... [ 68%]
+............................................................ [ 77%]
+.................. [ 80%]
+.............................................................. [ 90%]
+.............................................. [ 98%]
+..........                 [100%]
+618 passed, 11318 subtests passed in 7.43s
+PASS tests/test_more.py::SeekableTest::test_exhaustion_reset
+PASS tests/test_more.py::SeekableTest::test_maxlen_zero
+PASS tests/test_more.py::SeekableTest::test_partial_reset
+PASS tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory
+RESOLVED
