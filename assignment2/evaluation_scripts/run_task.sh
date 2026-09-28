@@ -68,12 +68,19 @@ open('$REPO_ROOT/.problem_' + t['instance_id'] + '.txt', 'w').write('\n\n'.join(
 echo "== task $IDX: $INSTANCE_ID" >&2
 echo "== image: $IMAGE" >&2
 if ! docker pull $PLATFORM_FLAG "$IMAGE" >&2; then
-  # A mytest/ image you built locally has no registry to be pulled from. That
-  # is fine, as long as the tag exists in the local Docker daemon.
-  docker image inspect "$IMAGE" >/dev/null 2>&1 || {
-    echo "error: cannot pull $IMAGE, and no such image in the local daemon" >&2
-    exit 1
-  }
+  # A mytest/ image has no registry to pull from. If the tag is absent in the
+  # local daemon, build it from the shipped Dockerfile in
+  # mytest/tasks/<instance_id>/ so the task runs on a fresh machine.
+  if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
+    DOCKERFILE_DIR="$REPO_ROOT/mytest/tasks/$INSTANCE_ID"
+    if [[ -f "$DOCKERFILE_DIR/Dockerfile" ]]; then
+      echo "== building $IMAGE from $DOCKERFILE_DIR" >&2
+      docker build $PLATFORM_FLAG -q -t "$IMAGE" "$DOCKERFILE_DIR" >&2
+    else
+      echo "error: cannot pull $IMAGE, no local image, no Dockerfile" >&2
+      exit 1
+    fi
+  fi
   echo "== using local image $IMAGE" >&2
 fi
 
