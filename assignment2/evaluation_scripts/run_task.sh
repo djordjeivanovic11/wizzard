@@ -88,7 +88,10 @@ docker run --rm $PLATFORM_FLAG \
   --entrypoint bash \
   -v "$REPO_ROOT:/madsLoop" \
   -e CS2680_API_KEY="${CS2680_API_KEY:-}" \
+  -e CS2680_BASE_URL="${CS2680_BASE_URL:-}" \
+  -e MADSLOOP_MODEL="${MADSLOOP_MODEL:-}" \
   -e MADSLOOP_MAX_ITERS="${MADSLOOP_MAX_ITERS:-80}" \
+  -e MADSLOOP_MAX_TOKENS="${MADSLOOP_MAX_TOKENS:-}" \
   -e MADSLOOP_BASELINE="${MADSLOOP_BASELINE:-}" \
   -e PROBLEM_FILE="/madsLoop/.problem_${INSTANCE_ID}.txt" \
   -e LOG_DEST="/madsLoop/madsLoop_logs/$INSTANCE_ID" \

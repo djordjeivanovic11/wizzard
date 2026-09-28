@@ -1,20 +1,20 @@
 {
- "mytest_packaging_fold": {
-  "instance_id": "mytest_packaging_fold",
-  "repo": "pypa/packaging",
-  "docker_image": "mytest/packaging-fold:local",
-  "base_commit": "413d006fadf5b9b14d78ad444201d8189bff8c64",
-  "problem_statement": "packaging.metadata's RFC822Message only folds literal newline characters when serializing headers. Values containing a bare carriage return make the email generator raise HeaderWriteError at write time, and \u2014 more seriously \u2014 on CPython releases without the CVE-2024-6923 fix any other character that str.splitlines treats as a line boundary (for example \\v, \\f, \\x1c-\\x1e, \\x85, U+2028, U+2029) terminates the header inside email.message_from_string, so the remainder of the value is parsed as a NEW header: a header-injection vector via Metadata.as_rfc822(). Symmetrically, Metadata's Summary validation only rejects '\\n', letting summaries containing a bare '\\r' or a U+2028 boundary pass validation. Fix serialization so every line boundary is folded to '\\n       ' continuation syntax, and strengthen Summary (and equivalent header value validation) so any exotic line boundary is rejected as invalid metadata.",
-  "requirements": "",
-  "interface": ""
- },
- "mytest_slugify_hardcut": {
-  "instance_id": "mytest_slugify_hardcut",
-  "repo": "un33k/python-slugify",
-  "base_commit": "c442cd4cb61763c85b078d6ea83b5959c3ff364a",
-  "docker_image": "mytest/slugify-hardcut:local",
-  "problem_statement": "In python-slugify, slugify() with algorithm='modern' produces a wrong result when a hard length cut lands on text that contains repeated separators introduced by replacements. Reproduce with slugify('value', replacements=[('value', 'one--two')], replacement_stage='post', allow_unicode=True, separator='-', max_length=6): the correct slug is 'one--t', but today it returns 'one' \u2014 the double dash before 'two' is lost instead of being kept with the word. With separator='::' and max_length=8 the result must be 'one::::t' (each run of consecutive separators belongs to the word that follows it, and counts toward max_length). A hard cut must also never end in a dangling separator: max_length=4 or 5 on the same input must yield 'one', and an input that is only separators such as '--one' or '---' must yield '' or the cut prefix of leading separators (e.g. '--o' at max_length=3) \u2014 never a trailing one like 'one-'. Fix the modern truncation logic so consecutive separators stay attached to the following word and a hard cut never emits a trailing separator. Other slugify behavior (legacy algorithm, entities, unicode, word_boundary mode) must be unchanged.",
-  "requirements": "",
-  "interface": ""
- }
+  "mytest_packaging_fold": {
+    "instance_id": "mytest_packaging_fold",
+    "repo": "pypa/packaging",
+    "docker_image": "mytest/packaging-fold:local",
+    "base_commit": "413d006fadf5b9b14d78ad444201d8189bff8c64",
+    "problem_statement": "packaging.metadata's RFC822Message only folds literal newline characters when serializing headers. Values containing a bare carriage return make the email generator raise HeaderWriteError at write time, and \u2014 more seriously \u2014 on CPython releases without the CVE-2024-6923 fix any other character that str.splitlines treats as a line boundary (for example \\v, \\f, \\x1c-\\x1e, \\x85, U+2028, U+2029) terminates the header inside email.message_from_string, so the remainder of the value is parsed as a NEW header: a header-injection vector via Metadata.as_rfc822(). Symmetrically, Metadata's Summary validation only rejects '\\n', letting summaries containing a bare '\\r' or a U+2028 boundary pass validation. Fix serialization so every line boundary is folded to '\\n       ' continuation syntax, and strengthen Summary (and equivalent header value validation) so any exotic line boundary is rejected as invalid metadata.",
+    "requirements": "",
+    "interface": ""
+  },
+  "mytest_slugify_hardcut": {
+    "instance_id": "mytest_slugify_hardcut",
+    "repo": "un33k/python-slugify",
+    "base_commit": "c442cd4cb61763c85b078d6ea83b5959c3ff364a",
+    "docker_image": "mytest/slugify-hardcut:local",
+    "problem_statement": "In python-slugify, slugify() with algorithm='modern' produces a wrong result when a hard length cut lands on text that contains repeated separators introduced by replacements. Reproduce with slugify('value', replacements=[('value', 'one--two')], replacement_stage='post', allow_unicode=True, separator='-', max_length=6): the correct slug is 'one--t', but today it returns 'one' \u2014 the double dash before 'two' is lost instead of being kept with the word. With separator='::' and max_length=8 the result must be 'one::::t' (each run of consecutive separators belongs to the word that follows it, and counts toward max_length). A hard cut must also never end in a dangling separator: max_length=4 or 5 on the same input must yield 'one', and an input that is only separators such as '--one' or '---' must yield '' or the cut prefix of leading separators (e.g. '--o' at max_length=3) \u2014 never a trailing one like 'one-'. Fix the modern truncation logic so consecutive separators stay attached to the following word and a hard cut never emits a trailing separator. Other slugify behavior (legacy algorithm, entities, unicode, word_boundary mode) must be unchanged.",
+    "requirements": "",
+    "interface": ""
+  }
 }

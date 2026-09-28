@@ -86,11 +86,14 @@ collect `tests/observeApiError.test.ts` because ...]
        only -> empty patch.  Improved run produced a seekable maxlen=0 fix
        that verify.sh scores RESOLVED (see results/*.before/after.log).
      - mytest_packaging_tokend: improved run resolves
-       (results/mytest_packaging_tokend.after.log).  NOTE: the BASELINE run
-       was cut off by the course API budget before finishing, so the
-       "failed at first" side of the story rests on your word — if budget
-       returns, rerun `MADSLOOP_BASELINE=1` on it once for your own
-       confidence before writing.
+       (results/mytest_packaging_tokend.after.log).  BASELINE side is now
+       observed too: after the course budget ran out we re-ran the
+       baseline config with gpt-4.1-mini via the harness's
+       MADSLOOP_MODEL/CS2680_BASE_URL overrides — its 2165-byte patch
+       still failed all 3 fail_to_pass ids (verify output in session
+       notes).  You may want to sanity-check with one
+       `MADSLOOP_BASELINE=1` qwen run when quota returns (Oct 6), but
+       the fail->pass story is no longer unverified.
      - Runner-up candidates already proven unsuitable: unbounded, asciiskip,
        tags_empty, bucket_phantom, falsyexc — the BASELINE already solves
        them. fold + hardcut are the submitted unsolved pair: fold's improved
@@ -118,7 +121,10 @@ collect `tests/observeApiError.test.ts` because ...]
      - mytest_slugify_hardcut: agent ended with no_tool_calls twice
        (baseline 17 iters, second attempt 9 iters) producing no edits —
        the fix is a small post-replacement-delimiter guard but the model
-       never committed to an edit. Gold patch resolves
+       never committed to an edit. A third improved-config attempt
+       (gpt-4.1-mini) did produce a 6693-byte patch, but it sent
+       tests/test_release.py into an infinite loop — killed after
+       18 min. Gold patch resolves
        (results/mytest_slugify_hardcut.after.log).
 -->
 

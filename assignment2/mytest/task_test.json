@@ -1,87 +1,87 @@
 {
- "mytest_slugify_hardcut": {
-  "before_repo_set_cmd": "git reset --hard c442cd4cb61763c85b078d6ea83b5959c3ff364a && git clean -fd && git checkout c442cd4cb61763c85b078d6ea83b5959c3ff364a && git checkout 8f9a550a906701412c8fc93e731582098f2caee2 -- tests/test_release.py",
-  "selected_test_files_to_run": [
-   "tests/test_release.py"
-  ],
-  "fail_to_pass": [
-   "tests/test_release.py::ReleaseRegressionTests::test_modern_hard_cut_does_not_end_in_post_replacement_delimiters",
-   "tests/test_release.py::ReleaseRegressionTests::test_modern_word_boundary_hard_cut_keeps_delimiters_with_the_next_word"
-  ],
-  "pass_to_pass": [
-   "tests/test_release.py::ReleaseRegressionTests::test_modern_separator_does_not_strip_word_content",
-   "tests/test_release.py::ReleaseRegressionTests::test_modern_fitting_post_replacements_preserve_delimiters",
-   "tests/test_release.py::ReleaseRegressionTests::test_cli_preserves_legacy_default_shape",
-   "tests/test_release.py::ReleaseRegressionTests::test_empty_and_whitespace"
-  ]
- },
- "mytest_moreit_seekable": {
-  "before_repo_set_cmd": "git reset --hard b5e3886a37209bb880f17d82fbf4ba00ece0e41e && git clean -fd && git checkout b5e3886a37209bb880f17d82fbf4ba00ece0e41e && git checkout 3eb4053e1aacac53853f6e0abae556f280726f01 -- tests/test_seekable_memory.py",
-  "selected_test_files_to_run": [
-   "tests/test_seekable_memory.py",
-   "tests/test_more.py"
-  ],
-  "fail_to_pass": [
-   "tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory"
-  ],
-  "pass_to_pass": [
-   "tests/test_more.py::SeekableTest::test_maxlen_zero",
-   "tests/test_more.py::SeekableTest::test_exhaustion_reset",
-   "tests/test_more.py::SeekableTest::test_partial_reset"
-  ]
- },
- "mytest_packaging_fold": {
-  "before_repo_set_cmd": "git reset --hard 413d006fadf5b9b14d78ad444201d8189bff8c64 && git clean -fd && git checkout 413d006fadf5b9b14d78ad444201d8189bff8c64 && git checkout 2d873eb6002021a8c007c933fbdab58b37a5079b -- tests/test_metadata.py",
-  "selected_test_files_to_run": [
-   "tests/test_metadata.py"
-  ],
-  "fail_to_pass": [
-   "tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\r]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x0b]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x0c]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1c]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1d]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1e]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x85]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\u2028]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\u2029]",
-   "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\rAgain]",
-   "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\u2028Again]"
-  ],
-  "pass_to_pass": [
-   "tests/test_metadata.py::TestMetadataWriting::test_multiline_license",
-   "tests/test_metadata.py::TestMetadataWriting::test_body",
-   "tests/test_metadata.py::TestMetadata::test_valid_summary",
-   "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\n    Again]",
-   "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\r\\n]"
-  ]
- },
- "mytest_packaging_tokend": {
-  "before_repo_set_cmd": "git reset --hard 0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81 && git clean -fd && git checkout 0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81 && git checkout 189a76d54d64899adbca907c2a3efa5b6befdb28 -- tests/test_markers.py tests/test_requirements.py",
-  "selected_test_files_to_run": [
-   "tests/test_markers.py",
-   "tests/test_requirements.py"
-  ],
-  "fail_to_pass": [
-   "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\n]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\n]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\n]"
-  ],
-  "pass_to_pass": [
-   "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[ ]",
-   "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[\\t]",
-   "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[ \\t]",
-   "tests/test_requirements.py::TestRequirementParsing::test_trailing_horizontal_whitespace[ ]",
-   "tests/test_requirements.py::TestRequirementParsing::test_trailing_horizontal_whitespace[\\t]",
-   "tests/test_requirements.py::TestRequirementParsing::test_empty_extras",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_missing_comma_in_extras",
-   "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\r]",
-   "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\r\\n]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\r]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\r\\n]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\r]",
-   "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\r\\n]"
-  ]
- }
+  "mytest_slugify_hardcut": {
+    "before_repo_set_cmd": "git reset --hard c442cd4cb61763c85b078d6ea83b5959c3ff364a && git clean -fd && git checkout c442cd4cb61763c85b078d6ea83b5959c3ff364a && git checkout 8f9a550a906701412c8fc93e731582098f2caee2 -- tests/test_release.py",
+    "selected_test_files_to_run": [
+      "tests/test_release.py"
+    ],
+    "fail_to_pass": [
+      "tests/test_release.py::ReleaseRegressionTests::test_modern_hard_cut_does_not_end_in_post_replacement_delimiters",
+      "tests/test_release.py::ReleaseRegressionTests::test_modern_word_boundary_hard_cut_keeps_delimiters_with_the_next_word"
+    ],
+    "pass_to_pass": [
+      "tests/test_release.py::ReleaseRegressionTests::test_modern_separator_does_not_strip_word_content",
+      "tests/test_release.py::ReleaseRegressionTests::test_modern_fitting_post_replacements_preserve_delimiters",
+      "tests/test_release.py::ReleaseRegressionTests::test_cli_preserves_legacy_default_shape",
+      "tests/test_release.py::ReleaseRegressionTests::test_empty_and_whitespace"
+    ]
+  },
+  "mytest_moreit_seekable": {
+    "before_repo_set_cmd": "git reset --hard b5e3886a37209bb880f17d82fbf4ba00ece0e41e && git clean -fd && git checkout b5e3886a37209bb880f17d82fbf4ba00ece0e41e && git checkout 3eb4053e1aacac53853f6e0abae556f280726f01 -- tests/test_seekable_memory.py",
+    "selected_test_files_to_run": [
+      "tests/test_seekable_memory.py",
+      "tests/test_more.py"
+    ],
+    "fail_to_pass": [
+      "tests/test_seekable_memory.py::SeekableMemoryTests::test_repeated_zero_cache_peek_has_bounded_memory"
+    ],
+    "pass_to_pass": [
+      "tests/test_more.py::SeekableTest::test_maxlen_zero",
+      "tests/test_more.py::SeekableTest::test_exhaustion_reset",
+      "tests/test_more.py::SeekableTest::test_partial_reset"
+    ]
+  },
+  "mytest_packaging_fold": {
+    "before_repo_set_cmd": "git reset --hard 413d006fadf5b9b14d78ad444201d8189bff8c64 && git clean -fd && git checkout 413d006fadf5b9b14d78ad444201d8189bff8c64 && git checkout 2d873eb6002021a8c007c933fbdab58b37a5079b -- tests/test_metadata.py",
+    "selected_test_files_to_run": [
+      "tests/test_metadata.py"
+    ],
+    "fail_to_pass": [
+      "tests/test_metadata.py::TestMetadataWriting::test_write_metadata_with_carriage_return",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\r]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x0b]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x0c]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1c]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1d]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x1e]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\x85]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\u2028]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\u2029]",
+      "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\rAgain]",
+      "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\u2028Again]"
+    ],
+    "pass_to_pass": [
+      "tests/test_metadata.py::TestMetadataWriting::test_multiline_license",
+      "tests/test_metadata.py::TestMetadataWriting::test_body",
+      "tests/test_metadata.py::TestMetadata::test_valid_summary",
+      "tests/test_metadata.py::TestMetadata::test_invalid_summary[Hello\\n    Again]",
+      "tests/test_metadata.py::TestMetadataWriting::test_headers_fold_every_line_boundary[\\r\\n]"
+    ]
+  },
+  "mytest_packaging_tokend": {
+    "before_repo_set_cmd": "git reset --hard 0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81 && git clean -fd && git checkout 0bfc3cea4f9fe1b1b0c80ce06f02bd2433500c81 && git checkout 189a76d54d64899adbca907c2a3efa5b6befdb28 -- tests/test_markers.py tests/test_requirements.py",
+    "selected_test_files_to_run": [
+      "tests/test_markers.py",
+      "tests/test_requirements.py"
+    ],
+    "fail_to_pass": [
+      "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\n]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\n]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\n]"
+    ],
+    "pass_to_pass": [
+      "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[ ]",
+      "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[\\t]",
+      "tests/test_markers.py::TestMarker::test_parses_trailing_horizontal_whitespace[ \\t]",
+      "tests/test_requirements.py::TestRequirementParsing::test_trailing_horizontal_whitespace[ ]",
+      "tests/test_requirements.py::TestRequirementParsing::test_trailing_horizontal_whitespace[\\t]",
+      "tests/test_requirements.py::TestRequirementParsing::test_empty_extras",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_missing_comma_in_extras",
+      "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\r]",
+      "tests/test_markers.py::TestMarker::test_parses_invalid_trailing_line_break[\\r\\n]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\r]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name>=1-\\r\\n]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\r]",
+      "tests/test_requirements.py::TestRequirementParsing::test_error_when_suffixed_with_line_break[name; python_version >= \"3\"-\\r\\n]"
+    ]
+  }
 }
