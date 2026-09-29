@@ -5,8 +5,11 @@ into the tool message — and is logged in `tool_result.result` verbatim, after
 truncation, so the log reflects exactly what the model saw.
 """
 
+import fnmatch
 import json
 import os
+import re
+import shutil
 import subprocess
 
 MAX_OUTPUT_CHARS = 30000   # per tool result, head+tail kept
@@ -14,6 +17,10 @@ MAX_READ_LINES = 2000
 DEFAULT_READ_LINES = 400
 BASH_DEFAULT_TIMEOUT = 180
 BASH_MAX_TIMEOUT = 900
+SEARCH_MAX_MATCHES = 200
+SEARCH_SKIP_DIRS = {".git", ".hg", ".svn", "node_modules", "__pycache__",
+                    ".tox", ".venv", "venv", "dist", "build",
+                    ".mypy_cache", ".pytest_cache", ".idea", "target"}
 
 
 def truncate(text: str, limit: int = MAX_OUTPUT_CHARS) -> str:
@@ -182,6 +189,63 @@ def _write_file(args: dict, workdir: str):
     return f"ok: {verb} {path} ({len(content)} bytes)", False
 
 
+def _search(args: dict, workdir: str):
+    """Regex (or literal) text search over the repo; pure Python, no deps."""
+    pattern = args.get("pattern")
+    if not isinstance(pattern, str) or not pattern:
+        return "error: 'pattern' must be a non-empty string", True
+    try:
+        rx = re.compile(pattern)
+    except re.error:
+        rx = re.compile(re.escape(pattern))
+    base = args.get("path") or "."
+    real, err = _resolve(workdir, base)
+    if err:
+        return err, True
+    if not os.path.exists(real):
+        return f"error: no such path: {base}", True
+    glob_pat = args.get("file_glob")
+    if glob_pat is not None and not isinstance(glob_pat, str):
+        return "error: 'file_glob' must be a string", True
+    files = []
+    if os.path.isfile(real):
+        files = [real]
+    else:
+        for dirpath, dirnames, filenames in os.walk(real):
+            dirnames[:] = sorted(d for d in dirnames
+                                 if d not in SEARCH_SKIP_DIRS)
+            for fn in sorted(filenames):
+                if glob_pat and not fnmatch.fnmatch(fn, glob_pat):
+                    continue
+                files.append(os.path.join(dirpath, fn))
+    matches, scanned, hits = [], 0, 0
+    for fp in files:
+        try:
+            if os.path.getsize(fp) > 2_000_000:
+                continue
+            with open(fp, "r", encoding="utf-8", errors="replace") as f:
+                data = f.read()
+            if "\0" in data[:8192]:
+                continue
+        except OSError:
+            continue
+        scanned += 1
+        rel = os.path.relpath(fp, workdir)
+        for n, line in enumerate(data.split("\n"), 1):
+            if rx.search(line):
+                hits += 1
+                if len(matches) < SEARCH_MAX_MATCHES:
+                    matches.append(f"{rel}:{n}: {line.strip()[:300]}")
+    if hits == 0:
+        return (f"no matches for {pattern!r} under {base} "
+                f"({scanned} files searched)"), False
+    out = "\n".join(matches)
+    if hits > len(matches):
+        out += (f"\n[{hits - len(matches)} more matches — "
+                "narrow the pattern, path, or file_glob]")
+    return truncate(out), False
+
+
 TOOLS = [
     {
         "type": "function",
@@ -217,6 +281,22 @@ TOOLS = [
     {
         "type": "function",
         "function": {
+            "name": "search",
+            "description": "Search file contents for a regex (or literal string) across the repo — faster and cleaner than grep through bash. Returns path:line: text matches, capped at 200.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "regex or literal text to find"},
+                    "path": {"type": "string", "description": "file or directory to search under (default: repo root)"},
+                    "file_glob": {"type": "string", "description": "filename filter like '*.py' (optional)"},
+                },
+                "required": ["pattern"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "edit_file",
             "description": "Replace an exact string in a file. old_string must match exactly once — include enough surrounding context (indentation matters). Read the file first to get exact text.",
             "parameters": {
@@ -242,6 +322,31 @@ TOOLS = [
                     "content": {"type": "string"},
                 },
                 "required": ["path", "content"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "todo",
+            "description": "Write or update your working plan — replaces the whole list. Keep it current: the list persists even when older tool outputs are dropped from context, and `done` is rejected while items remain unfinished.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "description": "the full replacement plan",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "text": {"type": "string"},
+                                "status": {"type": "string", "enum": ["pending", "in_progress", "done"]},
+                            },
+                            "required": ["text", "status"],
+                        },
+                    },
+                },
+                "required": ["items"],
             },
         },
     },
@@ -313,7 +418,150 @@ def run_check(command: str):
     return truncate((out + "\n" + status).strip()), proc.returncode == 0
 
 
-def execute_tool(name: str, arguments, workdir: str, repro: ReproRegistry):
+class TodoRegistry:
+    """The agent's working plan. Persisted via the system prompt so it
+    survives context masking; `done` is rejected while items are open."""
+
+    STATUSES = ("pending", "in_progress", "done")
+
+    def __init__(self):
+        self.items = []
+
+    def set(self, items):
+        out = []
+        for i, it in enumerate(items[:20], 1):
+            if not isinstance(it, dict):
+                continue
+            text = str(it.get("text", "")).strip()[:200]
+            status = str(it.get("status", "pending")).lower()
+            if status not in self.STATUSES:
+                status = "pending"
+            if text:
+                out.append({"id": i, "text": text, "status": status})
+        self.items = out
+
+    def open_items(self):
+        return [t for t in self.items if t["status"] != "done"]
+
+    def render(self):
+        """Plan block appended to the system prompt ("" when no plan yet)."""
+        if not self.items:
+            return ""
+        marks = {"done": "x", "in_progress": ">", "pending": " "}
+        lines = [f"{t['id']}. [{marks[t['status']]}] {t['text']}"
+                 for t in self.items]
+        return "\n\n## Current plan\n" + "\n".join(lines)
+
+
+def _todo(args: dict, todo: TodoRegistry):
+    items = args.get("items")
+    if not isinstance(items, list) or not items:
+        return ("error: 'items' must be a non-empty list of "
+                "{text, status} objects"), True
+    todo.set(items)
+    return "ok: plan updated" + todo.render(), False
+
+
+TEST_DIR_NAMES = {"test", "tests", "testing", "spec", "specs"}
+RELATED_TEST_TIMEOUT = 240
+
+
+def _touched_files(workdir: str):
+    out = subprocess.run(["git", "-C", workdir, "diff", "--name-only", "HEAD"],
+                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                         text=True, timeout=20)
+    touched = [l for l in out.stdout.split("\n") if l.strip()]
+    st = subprocess.run(["git", "-C", workdir, "status", "--porcelain"],
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                        text=True, timeout=20)
+    touched += [l[3:].strip().strip('"') for l in st.stdout.split("\n")
+                if l.startswith("??")]
+    return touched
+
+
+def _test_candidates(workdir: str, touched):
+    """Existing test files whose name relates to a touched file's stem."""
+    stems = {os.path.basename(f).rsplit(".", 1)[0].lstrip("_")
+             for f in touched if "." in os.path.basename(f)}
+    stems.discard("")
+    if not stems:
+        return []
+    cands = []
+    for dirpath, dirnames, filenames in os.walk(workdir):
+        dirnames[:] = [d for d in dirnames if d not in SEARCH_SKIP_DIRS]
+        parts = set(os.path.relpath(dirpath, workdir).split(os.sep))
+        for fn in sorted(filenames):
+            low = fn.lower()
+            if not low.endswith((".py", "_test.go", ".test.ts", ".test.js",
+                                 ".test.tsx", ".test.jsx")):
+                continue
+            base = low.rsplit(".", 1)[0]
+            is_test = (parts & TEST_DIR_NAMES or base.startswith("test_")
+                       or base.endswith("_test") or base.endswith(".test"))
+            if not is_test:
+                continue
+            stem = base
+            for cut in ("test_", "_test", ".test"):
+                if stem.startswith(cut):
+                    stem = stem[len(cut):]
+                if stem.endswith(cut):
+                    stem = stem[:-len(cut)]
+            if stem and any(stem == s or stem in s or s in stem
+                            for s in stems):
+                cands.append(os.path.join(dirpath, fn))
+    return cands[:12]
+
+
+def _run_related_tests(workdir: str):
+    """Best-effort run of existing tests related to the changed files.
+    Returns None when nothing runnable is found, else (ok, output)."""
+    try:
+        cands = _test_candidates(workdir, _touched_files(workdir))
+    except Exception:
+        return None
+    if not cands:
+        return None
+    py = [c for c in cands if c.endswith(".py")]
+    go = sorted({os.path.dirname(c) for c in cands
+                 if c.endswith("_test.go")})
+    results, failures = [], 0
+    if py:
+        runner = None
+        for pyexe in ("python3", "python"):
+            probe = subprocess.run([pyexe, "-m", "pytest", "--version"],
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL, timeout=30)
+            if probe.returncode == 0:
+                runner = pyexe
+                break
+        if runner:
+            p = subprocess.run([runner, "-m", "pytest", "-x", "-q",
+                                "--tb=line", *py],
+                               cwd=workdir, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True,
+                               timeout=RELATED_TEST_TIMEOUT)
+            results.append("--- pytest " + " ".join(
+                os.path.relpath(c, workdir) for c in py)
+                           + "\n" + p.stdout[-6000:])
+            failures += p.returncode
+    for d in go[:4]:
+        if not shutil.which("go"):
+            break
+        p = subprocess.run(["go", "test", "-count=1", "./..."],
+                           cwd=d, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, text=True,
+                           timeout=RELATED_TEST_TIMEOUT)
+        results.append(f"--- go test in {os.path.relpath(d, workdir)}\n"
+                       + p.stdout[-4000:])
+        failures += p.returncode
+    if not results:
+        return None
+    text = "\n".join(results)
+    return failures == 0, truncate(text)
+
+
+def execute_tool(name: str, arguments, workdir: str, repro: ReproRegistry,
+                 todo: TodoRegistry):
     """Run one tool call. Returns (result_text, is_error). `done` is handled
     by the caller (the agent loop) and never reaches here."""
     if isinstance(arguments, str):
@@ -332,6 +580,10 @@ def execute_tool(name: str, arguments, workdir: str, repro: ReproRegistry):
             return _edit_file(arguments, workdir)
         if name == "write_file":
             return _write_file(arguments, workdir)
+        if name == "search":
+            return _search(arguments, workdir)
+        if name == "todo":
+            return _todo(arguments, todo)
         if name == "repro_check":
             cmd = arguments.get("command")
             if not isinstance(cmd, str) or not cmd.strip():
@@ -339,6 +591,7 @@ def execute_tool(name: str, arguments, workdir: str, repro: ReproRegistry):
             text, ok = repro.add_and_run(cmd, str(arguments.get("name", "")))
             return text, not ok
         return (f"error: unknown tool {name!r}. Available: "
-                "bash, read_file, edit_file, write_file, repro_check, done"), True
+                "bash, read_file, edit_file, write_file, search, todo, "
+                "repro_check, done"), True
     except Exception as e:  # never let a tool crash the run
         return f"error: {type(e).__name__}: {e}", True

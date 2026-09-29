@@ -17,15 +17,18 @@ from openai import OpenAI
 
 from .logs import JsonlLogger
 from .prompts import system_prompt, user_prompt
-from .tools import TOOLS, ReproRegistry, execute_tool, truncate
+from .tools import (TOOLS, ReproRegistry, TodoRegistry,
+                    _run_related_tests, execute_tool, truncate)
 
 MODEL = os.environ.get("MADSLOOP_MODEL", "qwen3.6-35b-a3b")
 BASE_URL = os.environ.get("CS2680_BASE_URL", "https://api.cs2680.com/v1")
 # MADSLOOP_BASELINE=1 restores the handout-faithful design (Parts 0/1 as
-# written): no no-tool-call nudges, no repro_check tool, `done` is never
-# pushed back. Used to demonstrate the before/after for mytest/
+# written): no no-tool-call nudges, no repro_check/todo/search tools, `done`
+# is never pushed back. Used to demonstrate the before/after for mytest/
 # solved_after_change.json — the graded path is the default.
 BASELINE = os.environ.get("MADSLOOP_BASELINE", "") in ("1", "true", "yes")
+BASELINE_HIDDEN_TOOLS = {"repro_check", "todo", "search"}
+MIN_ITERS_FOR_TEST_CHECK = 20
 
 MAX_ITERATIONS = int(os.environ.get("MADSLOOP_MAX_ITERS") or "80")
 MAX_TOKENS = int(os.environ.get("MADSLOOP_MAX_TOKENS") or "32768")
@@ -112,6 +115,7 @@ def _workdir_has_changes(workdir: str) -> bool:
 def run_agent(problem: str, workdir: str, log: bool) -> int:
     logger = JsonlLogger(log, os.getcwd())
     repro = ReproRegistry()
+    todo = TodoRegistry()
     logger.emit("run_start", model_id=MODEL, workdir=workdir)
 
     try:
@@ -124,12 +128,14 @@ def run_agent(problem: str, workdir: str, log: bool) -> int:
     client = OpenAI(base_url=BASE_URL, api_key=os.environ["CS2680_API_KEY"],
                     max_retries=0)  # we do our own retries to log them
     tools = [t for t in TOOLS
-             if not (BASELINE and t["function"]["name"] == "repro_check")]
+             if not (BASELINE and t["function"]["name"]
+                     in BASELINE_HIDDEN_TOOLS)]
     if BASELINE:
         print("[madsLoop] BASELINE mode: handout-faithful tools/loop",
               file=sys.stderr)
+    base_system = system_prompt(workdir)
     messages = [
-        {"role": "system", "content": system_prompt(workdir)},
+        {"role": "system", "content": base_system},
         {"role": "user", "content": user_prompt(problem, workdir, listing)},
     ]
 
@@ -141,6 +147,9 @@ def run_agent(problem: str, workdir: str, log: bool) -> int:
     try:
         while iteration < MAX_ITERATIONS:
             iteration += 1
+            # keep the plan pinned to the system prompt — survives masking
+            if not BASELINE:
+                messages[0]["content"] = base_system + todo.render()
             resp = _chat(client, messages, tools, iteration, logger)
             if not resp.choices:
                 raise RuntimeError("API returned no choices")
@@ -195,7 +204,9 @@ def run_agent(problem: str, workdir: str, log: bool) -> int:
                     except Exception:
                         pass
                     ok, result = (True, f"done: {summary}") if BASELINE else \
-                        _handle_done(workdir, repro, summary, done_pushbacks)
+                        _handle_done(workdir, repro, todo, summary,
+                                     done_pushbacks,
+                                     MAX_ITERATIONS - iteration)
                     logger.emit("tool_result", iteration=iteration,
                                 tool_name="done", result=result, is_error=False)
                     messages.append({"role": "tool", "tool_call_id": tc.id,
@@ -206,7 +217,8 @@ def run_agent(problem: str, workdir: str, log: bool) -> int:
                         done_pushbacks += 1
                     continue
 
-                result, is_error = execute_tool(name, raw_args, workdir, repro)
+                result, is_error = execute_tool(name, raw_args, workdir,
+                                                repro, todo)
                 logger.emit("tool_result", iteration=iteration, tool_name=name,
                             result=result, is_error=is_error)
                 messages.append({"role": "tool", "tool_call_id": tc.id,
@@ -231,10 +243,11 @@ def _safe_json(raw: str):
         return {"_raw": raw}
 
 
-def _handle_done(workdir, repro: ReproRegistry, summary: str,
-                 pushbacks_so_far: int):
-    """Decide whether `done` is accepted. Push back at most twice: once for an
-    empty diff, and when registered repro checks fail."""
+def _handle_done(workdir, repro: ReproRegistry, todo: TodoRegistry,
+                 summary: str, pushbacks_so_far: int, iters_left: int):
+    """Decide whether `done` is accepted. Push back at most twice: for an
+    empty diff, unfinished plan items, failing repro checks, or failing
+    existing tests related to the changed files (last two need iters left)."""
     if pushbacks_so_far >= 2:
         return True, f"done: {summary}"
     if not _workdir_has_changes(workdir):
@@ -242,6 +255,13 @@ def _handle_done(workdir, repro: ReproRegistry, summary: str,
                        "there is nothing to submit. If the task is truly "
                        "impossible, call done again with an explanation; "
                        "otherwise make the fix first.")
+    open_items = todo.open_items()
+    if open_items:
+        lines = "\n".join(f"- {t['text']}" for t in open_items)
+        return False, ("pushback: your plan still has unfinished items:\n"
+                       + lines + "\nFinish them, or mark them done with "
+                       "`todo` if they turned out unnecessary, then call "
+                       "done again.")
     if repro.checks:
         results = repro.rerun_all()
         if any("FAILED" in r for r in results):
@@ -249,4 +269,14 @@ def _handle_done(workdir, repro: ReproRegistry, summary: str,
                            + "\n".join(results)[-4000:]
                            + "\nFix it, or update/remove the check if it was "
                              "wrong, then call done again.")
+    if iters_left >= MIN_ITERS_FOR_TEST_CHECK:
+        res = _run_related_tests(workdir)
+        if res is not None:
+            ok, text = res
+            if not ok:
+                return False, ("pushback: existing tests related to your "
+                               "changed files still fail:\n" + text[-4000:]
+                               + "\nFix the failures (or show they were "
+                               "already failing before your change), then "
+                               "call done again.")
     return True, f"done: {summary}"

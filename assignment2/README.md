@@ -12,7 +12,7 @@ madsLoop.py            # CLI entry point: -p "<problem>" [--log] <workdir>
 docker_env.sh          # container setup (installs openai)
 src/
   agent.py             # the loop: retries, nudges, done-pushback, context masking
-  tools.py             # tool schemas + executors (bash/read/edit/write/repro/done)
+  tools.py             # tool schemas + executors (bash/search/read/edit/write/todo/repro/done)
   prompts.py           # system + initial-user prompts
   logs.py              # JSONL event logger -> ./madsLoop_logs/run_*.jsonl
 evaluation_scripts/    # provided harness (run_task.sh lightly modified)
@@ -26,8 +26,18 @@ mytest/                # four self-built tasks (see 2.6)
 - **`repro_check` tool**: registers a reproduction command, runs it in /tmp,
   and re-runs every registered check when the model calls `done` — a check
   that still fails blocks finishing (bounded, max 2 pushbacks total).
+- **`todo` plan tool**: the agent maintains a 3–7-item plan that is
+  re-injected into the system prompt every turn, so it survives context
+  masking; `done` is rejected while plan items remain open.
+- **`search` tool**: pure-Python regex search over the repo (no external
+  deps, respects a skip-list of vendored/build dirs, caps at 200 matches)
+  — faster and cleaner than grep through bash.
 - **done-pushback**: `done` with an empty `git status` is rejected and the
   agent is asked to either make the fix or confirm the task is impossible.
+  It is also rejected while `todo` items are open, and — with ≥20
+  iterations left — when existing tests related to the changed files
+  still fail (pytest/go test are auto-detected and run on name-matched
+  test files).
 - **No-tool-call nudges**: a reply with no tool calls gets up to two
   "act through tools" nudges before the run ends as `no_tool_calls` —
   qwen3.6-35b-a3b often writes a long analysis paragraph mid-run.
@@ -57,5 +67,6 @@ bash evaluation_scripts/run_all.sh        # all provided tasks + eval
 `MADSLOOP_MAX_ITERS` (default 80) caps iterations; `MADSLOOP_MAX_TOKENS`
 (default 32768) sizes the completion budget; `MADSLOOP_PATCH_OUT` overrides
 the patch output path (useful for parallel runs); `MADSLOOP_BASELINE=1`
-restores the handout-faithful design (no nudges, no `repro_check`, `done`
-never pushed back) and is used to produce the `solved_after_change` evidence.
+restores the handout-faithful design (no nudges, no `repro_check`/`todo`/
+`search`, `done` never pushed back) and is used to produce the
+`solved_after_change` evidence.

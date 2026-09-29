@@ -69,6 +69,15 @@ collect `tests/observeApiError.test.ts` because ...]
        ones elided in place (context stays bounded, pairing preserved).
      - write_file for new files; edit_file reports descriptive errors on
        zero/multiple matches (a 35B model needs the feedback).
+     - a `todo` tool keeps a short working plan that is re-injected into the
+       system prompt every turn — it survives context masking, and `done`
+       is rejected while plan items are unfinished.
+     - a `search` tool does pure-Python regex search over the repo (skips
+       vendored/build dirs, caps at 200 matches) — cheaper than the model
+       fumbling `grep -r` through bash.
+     - `done` is ALSO rejected when existing tests related to the changed
+       files still fail: name-matched test files are auto-detected and run
+       (pytest / go test), gated to >=20 iterations left.
      - harness interpreter is auto-selected >=3.10 (uv bootstrap fallback) so
        modern syntax works on ancient image pythons; the agent's bash tool
        still uses the image python.
